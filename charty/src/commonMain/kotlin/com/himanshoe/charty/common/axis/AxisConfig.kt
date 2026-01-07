@@ -10,6 +10,7 @@ import kotlin.math.round
  * @property steps The number of steps or divisions to be shown on the axis.
  * @property label A descriptive label for the axis (e.g., "Sales", "Revenue").
  * @property drawAxisAtZero If `true` and the data spans across zero, the x-axis will be drawn at the zero-line (centered). If `false`, the x-axis will always be at the bottom.
+ * @property labelFormatter A custom formatter for axis labels. If not provided, uses the default [formatAxisLabel].
  */
 data class AxisConfig(
     val minValue: Float = 0f,
@@ -17,6 +18,7 @@ data class AxisConfig(
     val steps: Int = 5,
     val label: String = "",
     val drawAxisAtZero: Boolean = true,
+    val labelFormatter: (Float) -> String = ::formatAxisLabel,
 )
 
 
@@ -34,7 +36,7 @@ private const val ZERO_VALUE = 0f
  * @param value The float value to be formatted.
  * @return A formatted string representation of the value.
  */
-internal fun formatAxisLabel(value: Float): String =
+fun formatAxisLabel(value: Float): String =
     if (value % MODULO_CHECK_ZERO == ZERO_VALUE) {
         value.toInt().toString()
     } else {

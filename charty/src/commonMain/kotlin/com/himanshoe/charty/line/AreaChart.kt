@@ -65,6 +65,7 @@ private data class AreaChartDrawParams(
  * @param color The color or color scheme for the filled area. A gradient is recommended for a fade effect.
  * @param lineConfig The configuration for the line and its points, defined by a [LineChartConfig].
  * @param scaffoldConfig The configuration for the chart's scaffold, including axes and labels, defined by a [ChartScaffoldConfig].
+ * @param yAxisConfig Optional custom configuration for the Y-axis. If not provided, auto-calculated from data.
  * @param fillAlpha The alpha transparency for the filled area, ranging from 0.0f to 1.0f.
  * @param onPointClick A lambda function to be invoked when a point on the line is clicked, providing the corresponding [LineData].
  *
@@ -100,6 +101,7 @@ fun AreaChart(
         ),
     lineConfig: LineChartConfig = LineChartConfig(),
     scaffoldConfig: ChartScaffoldConfig = ChartScaffoldConfig(),
+    yAxisConfig: AxisConfig? = null,
     fillAlpha: Float = DEFAULT_FILL_ALPHA,
     onPointClick: ((LineData) -> Unit)? = null,
 ) {
@@ -125,7 +127,12 @@ fun AreaChart(
     ChartScaffold(
         modifier = chartModifier,
         xLabels = dataList.getLabels(),
-        yAxisConfig = createAxisConfig(minValue, maxValue, isBelowAxisMode),
+        yAxisConfig = yAxisConfig ?: AxisConfig(
+            minValue = minValue,
+            maxValue = maxValue,
+            steps = DEFAULT_AXIS_STEPS,
+            drawAxisAtZero = isBelowAxisMode,
+        ),
         config = scaffoldConfig,
     ) { chartContext ->
         tooltipManager.clearBounds()
@@ -173,20 +180,6 @@ private fun rememberAreaValueRange(
         val maxValue = com.himanshoe.charty.common.util.calculateMaxValue(values)
         minValue to maxValue
     }
-}
-
-
-private fun createAxisConfig(
-    minValue: Float,
-    maxValue: Float,
-    isBelowAxisMode: Boolean,
-): AxisConfig {
-    return AxisConfig(
-        minValue = minValue,
-        maxValue = maxValue,
-        steps = DEFAULT_AXIS_STEPS,
-        drawAxisAtZero = isBelowAxisMode,
-    )
 }
 
 private fun calculatePointPositions(

@@ -19,6 +19,7 @@ import com.himanshoe.charty.common.axis.LabelRotation
  * @property axisThickness The thickness of the axis lines.
  * @property gridThickness The thickness of the grid lines.
  * @property labelTextStyle The [TextStyle] for the axis labels, allowing for full customization of their appearance.
+ * @property xAxisLabelInterval The interval for displaying x-axis labels (1 = show all, 2 = show every other, etc.).
  */
 data class ChartScaffoldConfig(
     val showAxis: Boolean = true,
@@ -30,4 +31,5 @@ data class ChartScaffoldConfig(
     val axisThickness: Float = 2f,
     val gridThickness: Float = 1f,
     val labelTextStyle: TextStyle = TextStyle(color = Color.Companion.Black, fontSize = 12.sp),
+    val xAxisLabelInterval: Int = 1,
 )

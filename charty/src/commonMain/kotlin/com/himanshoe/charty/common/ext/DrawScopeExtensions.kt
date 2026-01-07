@@ -149,7 +149,7 @@ internal fun DrawScope.drawVerticalChartAxes(
         }
 
         if (config.showLabels) {
-            val textLayout = textMeasurer.measure(AnnotatedString(formatAxisLabel(value)), labelStyle)
+            val textLayout = textMeasurer.measure(AnnotatedString(yAxisConfig.labelFormatter(value)), labelStyle)
             val labelX = bounds.left - textLayout.size.width - LABEL_OFFSET
             val labelY = y - textLayout.size.height / CENTER_DIVISOR
             val topLeft = Offset(labelX, labelY)
@@ -166,15 +166,17 @@ internal fun DrawScope.drawVerticalChartAxes(
     if (config.showLabels && xLabels.isNotEmpty()) {
         val labelWidth = bounds.width / xLabels.size
         xLabels.forEachIndexed { index, label ->
-            val textLayout = textMeasurer.measure(AnnotatedString(label), labelStyle)
-            val centerX = bounds.left + labelWidth * (index + POSITION_OFFSET)
-            drawText(
-                textLayoutResult = textLayout,
-                topLeft = Offset(
-                    centerX - textLayout.size.width / CENTER_DIVISOR,
-                    bounds.bottom + LABEL_OFFSET,
-                ),
-            )
+            if (index % config.xAxisLabelInterval == 0) {
+                val textLayout = textMeasurer.measure(AnnotatedString(label), labelStyle)
+                val centerX = bounds.left + labelWidth * (index + POSITION_OFFSET)
+                drawText(
+                    textLayoutResult = textLayout,
+                    topLeft = Offset(
+                        centerX - textLayout.size.width / CENTER_DIVISOR,
+                        bounds.bottom + LABEL_OFFSET,
+                    ),
+                )
+            }
         }
     }
 }
@@ -269,7 +271,7 @@ internal fun DrawScope.drawHorizontalChartAxes(
         }
 
         if (config.showLabels) {
-            val textLayout = textMeasurer.measure(AnnotatedString(formatAxisLabel(value)), labelStyle)
+            val textLayout = textMeasurer.measure(AnnotatedString(yAxisConfig.labelFormatter(value)), labelStyle)
             drawText(
                 textLayoutResult = textLayout,
                 topLeft = Offset(
