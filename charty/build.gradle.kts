@@ -1,18 +1,15 @@
-import com.vanniktech.maven.publish.SonatypeHost
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidLibrary)
-    alias(libs.plugins.composeMultiplatform)
-    alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.dokka)
-    alias(libs.plugins.mavenPublish)
+    kotlin("multiplatform")
+    id("com.android.library")
+    id("org.jetbrains.compose")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
-group = System.getenv("GROUP") ?: project.findProperty("GROUP")?.toString() ?: "com.himanshoe"
-version = System.getenv("VERSION_NAME") ?: project.findProperty("VERSION_NAME")?.toString()
+group = "com.himanshoe"
+version = "2.1.0-local"
 
 composeCompiler {
     metricsDestination.set(project.layout.buildDirectory.dir("compose_metrics"))
@@ -22,7 +19,7 @@ composeCompiler {
 kotlin {
     androidTarget {
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
+            jvmTarget.set(JvmTarget.JVM_21)
         }
     }
 
@@ -59,107 +56,20 @@ kotlin {
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
         }
-        commonTest.dependencies {
-            implementation(libs.kotlin.test)
-        }
     }
 }
 
 android {
     namespace = "com.himanshoe.charty"
-    compileSdk =
-        libs.versions.android.compileSdk
-            .get()
-            .toInt()
+    compileSdk = 36
 
     defaultConfig {
-        minSdk =
-            libs.versions.android.minSdk
-                .get()
-                .toInt()
+        minSdk = 26
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 }
-
-tasks.dokkaHtml.configure {
-    outputDirectory.set(layout.buildDirectory.dir("dokka/html"))
-    moduleName.set("charty")
-
-    dokkaSourceSets.configureEach {
-        when (name) {
-            "commonMain" -> {
-                sourceRoots.from(file("src/commonMain/kotlin"))
-            }
-        }
-    }
-}
-
-// Task to generate verification.properties from template with environment variable
-val generateVerificationFile by tasks.registering {
-    val templateFile = file("src/commonMain/resources/META-INF/com/himanshoe/charty/verification.properties.template")
-    val outputFile = file("src/commonMain/resources/META-INF/com/himanshoe/charty/verification.properties")
-    val verificationToken = System.getenv("MAVEN_CENTRAL_VERIFICATION_TOKEN") ?: ""
-
-    inputs.file(templateFile)
-    inputs.property("verificationToken", verificationToken)
-    outputs.file(outputFile)
-
-    doLast {
-        if (verificationToken.isEmpty()) {
-            logger.warn("MAVEN_CENTRAL_VERIFICATION_TOKEN not set. Skipping verification file generation.")
-            if (outputFile.exists()) {
-                logger.info("Using existing verification.properties file.")
-            }
-        } else {
-            outputFile.parentFile.mkdirs()
-            val content = templateFile.readText().replace("\${MAVEN_CENTRAL_VERIFICATION_TOKEN}", verificationToken)
-            outputFile.writeText(content)
-            logger.lifecycle("✅ Generated verification.properties with token from environment variable")
-        }
-    }
-}
-
-tasks.withType<ProcessResources> {
-    dependsOn(generateVerificationFile)
-}
-
-mavenPublishing {
-    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL, automaticRelease = true)
-    signAllPublications()
-
-
-    pom {
-        name.set("Charty")
-        description.set("An Elementary Compose Multiplatform Chart library")
-        inceptionYear.set("2025")
-        url.set("https://github.com/hi-manshu/charty")
-
-        licenses {
-            license {
-                name.set("The Apache Software License, Version 2.0")
-                url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-                distribution.set("repo")
-            }
-        }
-
-        developers {
-            developer {
-                id.set("hi-manshu")
-                name.set("Himanshu Singh")
-                url.set("https://github.com/hi-manshu")
-            }
-        }
-
-        scm {
-            url.set("https://github.com/hi-manshu/charty")
-            connection.set("scm:git:git://github.com/hi-manshu/charty.git")
-            developerConnection.set("scm:git:ssh://git@github.com/hi-manshu/charty.git")
-        }
-    }
-}
-
 
