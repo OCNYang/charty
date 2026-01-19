@@ -33,7 +33,11 @@ kotlin {
         }
     }
 
-    jvm()
+    jvm("desktop") {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_21)
+        }
+    }
 
     js {
         browser()
